@@ -1,0 +1,44 @@
+{
+    "name": "backend",
+    "version": "1.0.0",
+    "author": "CloudAge Global",
+    "license": "CloudAge Confidential",
+    "private": true,
+    "bin": {
+        "prod": "bin/prod.js"
+    },
+    "scripts": {
+        "build": "tsc",
+        "watch": "tsc -w",
+        "test": "jest",
+        "cdk": "npx aws-cdk@2.1029.2",
+        "synth": "cdk synth"
+    },
+    "devDependencies": {
+        "@types/aws-lambda": "*",
+        "@types/jest": "*",
+        "@types/node": "*",
+        "aws-cdk": "*",
+        "jest": "*",
+        "ts-jest": "*",
+        "ts-node": "*",
+        "typescript": "*"
+    },
+    "dependencies": {
+        "@aws-amplify/data-construct": "*",
+        "@aws-cdk/aws-glue-alpha": "*",
+        "@aws-cdk/aws-lambda-python-alpha": "*",
+        "@aws-sdk/client-bedrock-runtime": "*",
+        "@aws-sdk/client-bedrock-agent-runtime": "*",
+        "@aws-sdk/client-codebuild": "*",
+        "@aws-sdk/client-glue": "*",
+        "@aws-sdk/credential-provider-node": "*",
+        "@aws/pdk": "*",
+        "@cdklabs/generative-ai-cdk-constructs": "*",
+        "aws-appsync": "*",
+        "aws-cdk-lib": "*",
+        "cdk-nag": "*",
+        "constructs": "*",
+        "graphql-tag": "*"
+    }
+}

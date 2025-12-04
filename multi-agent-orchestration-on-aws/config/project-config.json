@@ -1,0 +1,14 @@
+{
+    "projectId": "mac-prod",
+    "gitlabGroup": "genai-labs/prod-assets",
+    "gitlabProject": "multi-agent-orchestration",
+    "codeArtifact": false,
+    "codePipeline": false,
+    "midway": false,
+    "accounts": {
+        "prod": {
+            "number": "992167236365",
+            "region": "us-east-1"
+        }
+    }
+}

@@ -1,0 +1,44 @@
+{
+    "name": "frontend",
+    "version": "1.0.0",
+    "author": "CloudAge Global",
+    "license": "CloudAge Confidential",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "generate": "npx @aws-amplify/cli codegen",
+        "dev": "vite --host --port 3000",
+        "build": "vite build",
+        "build:typecheck": "tsc -b && vite build",
+        "preview": "vite preview --host --port 3000"
+    },
+    "dependencies": {
+        "@aws-amplify/ui-react": "*",
+        "@cloudscape-design/chat-components": "*",
+        "@cloudscape-design/code-view": "*",
+        "@cloudscape-design/global-styles": "*",
+        "aws-amplify": "*",
+        "aws-rum-web": "*",
+        "motion": "*",
+        "react": "*",
+        "react-dom": "*",
+        "react-icons": "*",
+        "react-router-dom": "*",
+        "reactflow": "*"
+    },
+    "devDependencies": {
+        "@eslint/js": "*",
+        "@types/papaparse": "*",
+        "@types/react": "*",
+        "@types/react-dom": "*",
+        "@vitejs/plugin-react": "*",
+        "eslint": "*",
+        "eslint-plugin-react-hooks": "*",
+        "eslint-plugin-react-refresh": "*",
+        "globals": "*",
+        "papaparse": "*",
+        "typescript": "*",
+        "typescript-eslint": "*",
+        "vite": "*"
+    }
+}

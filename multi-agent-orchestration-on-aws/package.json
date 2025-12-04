@@ -1,0 +1,70 @@
+{
+    "name": "multi-agent-orchestration",
+    "description": "Multi Agent Orchestration - Enterprise Grade Generative Ai Customer Support Agent",
+    "version": "2.0.0-prod",
+    "author": "CloudAge Global",
+    "license": "CloudAge Confidentail",
+    "private": true,
+    "workspaces": [
+        "src/*"
+    ],
+    "scripts": {
+        "setup": "pip install -r requirements-dev.txt && npm config set registry=https://registry.npmjs.com/ && npm install && cd ./src/backend && npm install && cd ../frontend && npm install",
+        "prepare": "husky",
+        "configure": "npx tsx tools/cli/configure.ts",
+        "format": "prettier --write . && ruff format .",
+        "lint": "eslint . && ruff check .",
+        "develop": "npx tsx tools/cli/develop.ts",
+        "stage": "git add -A",
+        "commit": "npx cz"
+    },
+    "lint-staged": {
+        "*.{js,jsx,ts,tsx}": [
+            "prettier --write",
+            "eslint --fix-dry-run"
+        ],
+        "*.{json,yaml,yml,md,html,css}": [
+            "prettier --write"
+        ],
+        "*.py": [
+            "ruff format",
+            "ruff check"
+        ]
+    },
+    "config": {
+        "commitizen": {
+            "path": "./node_modules/cz-conventional-changelog"
+        }
+    },
+    "engines": {
+        "node": "*"
+    },
+    "devDependencies": {
+        "@commitlint/cli": "*",
+        "@commitlint/config-conventional": "*",
+        "@commitlint/prompt-cli": "*",
+        "@commitlint/types": "*",
+        "@types/node": "*",
+        "@typescript-eslint/eslint-plugin": "*",
+        "@typescript-eslint/parser": "*",
+        "commitizen": "*",
+        "cz-conventional-changelog": "*",
+        "eslint": "*",
+        "eslint-config-prettier": "*",
+        "eslint-plugin-prettier": "*",
+        "globals": "*",
+        "husky": "*",
+        "lint-staged": "*",
+        "prettier": "*",
+        "tsx": "*",
+        "typescript": "^5.0.0",
+        "typescript-eslint": "*"
+    },
+    "dependencies": {
+        "@aws-sdk/client-cloudformation": "*",
+        "chalk": "^4.1.2",
+        "enquirer": "latest",
+        "yaml": "latest",
+        "zod": "latest"
+    }
+}
