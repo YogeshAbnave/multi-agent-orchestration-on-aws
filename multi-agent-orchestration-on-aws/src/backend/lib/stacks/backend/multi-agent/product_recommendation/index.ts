@@ -20,7 +20,7 @@ import { Function } from "aws-cdk-lib/aws-lambda";
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
 import { Construct } from "constructs";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync, readdirSync } from "fs";
 import * as path from "path";
 import { CommonBucket } from "../../../../common/constructs/s3";
 import { KnowledgeBaseSyncChecker } from "../kb-sync-checker/construct";
@@ -94,45 +94,51 @@ export class ProductRecommendationSubAgent extends Construct {
             }
         );
 
-        // Create knowledge base deployment with explicit sync
-        const productRecommendationKnowledgeDeployment = new BucketDeployment(
-            this,
-            "productRecommendationKnowledgeDeployment",
-            {
-                sources: [Source.asset(path.join(__dirname, "knowledge-base"))],
-                destinationBucket: productRecommendationKnowledgeBucket,
-                exclude: [".DS_Store"],
-                prune: true
-            }
-        );
+        // Create knowledge base deployment with explicit sync only if knowledge-base directory has files
+        const knowledgeBasePath = path.join(__dirname, "knowledge-base");
+        const hasKnowledgeBaseFiles = existsSync(knowledgeBasePath) && 
+            readdirSync(knowledgeBasePath).filter((f: string) => !f.startsWith('.')).length > 0;
 
-        // Add dependency to ensure rule is created first
-        productRecommendationKnowledgeDeployment.node.addDependency(
-            productRecommendationIngestionRule
-        );
-
-        // Add explicit ingestion job after deployment completes
-        const productRecommendationInitialIngestion = new Rule(this, "productRecommendationInitialIngestion", {
-            eventPattern: {
-                source: ["aws.cloudformation"],
-                detailType: ["CloudFormation Resource Status Change"],
-                detail: {
-                    resourceType: ["AWS::S3::BucketDeployment"],
-                    resourceStatus: ["CREATE_COMPLETE", "UPDATE_COMPLETE"],
-                    logicalResourceId: [productRecommendationKnowledgeDeployment.node.id]
+        if (hasKnowledgeBaseFiles) {
+            const productRecommendationKnowledgeDeployment = new BucketDeployment(
+                this,
+                "productRecommendationKnowledgeDeployment",
+                {
+                    sources: [Source.asset(knowledgeBasePath)],
+                    destinationBucket: productRecommendationKnowledgeBucket,
+                    exclude: [".DS_Store"],
+                    prune: true
                 }
-            },
-            targets: [
-                new AwsApi({
-                    service: "bedrock-agent",
-                    action: "startIngestionJob",
-                    parameters: {
-                        knowledgeBaseId: productRecommendationKnowledgeBase.knowledgeBaseId,
-                        dataSourceId: productRecommendationKnowledgeSource.dataSourceId,
-                    },
-                }),
-            ],
-        });
+            );
+
+            // Add dependency to ensure rule is created first
+            productRecommendationKnowledgeDeployment.node.addDependency(
+                productRecommendationIngestionRule
+            );
+
+            // Add explicit ingestion job after deployment completes
+            const productRecommendationInitialIngestion = new Rule(this, "productRecommendationInitialIngestion", {
+                eventPattern: {
+                    source: ["aws.cloudformation"],
+                    detailType: ["CloudFormation Resource Status Change"],
+                    detail: {
+                        resourceType: ["AWS::S3::BucketDeployment"],
+                        resourceStatus: ["CREATE_COMPLETE", "UPDATE_COMPLETE"],
+                        logicalResourceId: [productRecommendationKnowledgeDeployment.node.id]
+                    }
+                },
+                targets: [
+                    new AwsApi({
+                        service: "bedrock-agent",
+                        action: "startIngestionJob",
+                        parameters: {
+                            knowledgeBaseId: productRecommendationKnowledgeBase.knowledgeBaseId,
+                            dataSourceId: productRecommendationKnowledgeSource.dataSourceId,
+                        },
+                    }),
+                ],
+            });
+        }
 
         // Create a knowledge base sync checker to ensure data is synchronized
         const productRecommendationSyncChecker = new KnowledgeBaseSyncChecker(this, "productRecommendationSyncChecker", {
