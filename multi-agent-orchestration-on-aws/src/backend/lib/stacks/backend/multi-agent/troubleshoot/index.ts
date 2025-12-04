@@ -16,7 +16,7 @@ import { Effect, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
 import { Construct } from "constructs";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync, readdirSync } from "fs";
 import * as path from "path";
 import { CommonBucket } from "../../../../common/constructs/s3";
 import { KnowledgeBaseSyncChecker } from "../kb-sync-checker/construct";
@@ -77,43 +77,49 @@ export class TroubleshootSubAgent extends Construct {
             ],
         });
 
-        // Create knowledge base deployment with explicit sync
-        const troubleshootKnowledgeDeployment = new BucketDeployment(
-            this,
-            "troubleshootKnowledgeDeployment",
-            {
-                sources: [Source.asset(path.join(__dirname, "knowledge-base"))],
-                destinationBucket: troubleshootKnowledgeBucket,
-                exclude: [".DS_Store"],
-                prune: true
-            }
-        );
+        // Create knowledge base deployment with explicit sync only if knowledge-base directory has files
+        const knowledgeBasePath = path.join(__dirname, "knowledge-base");
+        const hasKnowledgeBaseFiles = existsSync(knowledgeBasePath) && 
+            readdirSync(knowledgeBasePath).filter((f: string) => !f.startsWith('.')).length > 0;
 
-        // Add dependency to ensure rule is created first
-        troubleshootKnowledgeDeployment.node.addDependency(troubleshootIngestionRule);
-
-        // Add explicit ingestion job after deployment completes
-        const troubleshootInitialIngestion = new Rule(this, "troubleshootInitialIngestion", {
-            eventPattern: {
-                source: ["aws.cloudformation"],
-                detailType: ["CloudFormation Resource Status Change"],
-                detail: {
-                    resourceType: ["AWS::S3::BucketDeployment"],
-                    resourceStatus: ["CREATE_COMPLETE", "UPDATE_COMPLETE"],
-                    logicalResourceId: [troubleshootKnowledgeDeployment.node.id]
+        if (hasKnowledgeBaseFiles) {
+            const troubleshootKnowledgeDeployment = new BucketDeployment(
+                this,
+                "troubleshootKnowledgeDeployment",
+                {
+                    sources: [Source.asset(knowledgeBasePath)],
+                    destinationBucket: troubleshootKnowledgeBucket,
+                    exclude: [".DS_Store"],
+                    prune: true
                 }
-            },
-            targets: [
-                new AwsApi({
-                    service: "bedrock-agent",
-                    action: "startIngestionJob",
-                    parameters: {
-                        knowledgeBaseId: troubleshootKnowledgeBase.knowledgeBaseId,
-                        dataSourceId: troubleshootKnowledgeSource.dataSourceId,
-                    },
-                }),
-            ],
-        });
+            );
+
+            // Add dependency to ensure rule is created first
+            troubleshootKnowledgeDeployment.node.addDependency(troubleshootIngestionRule);
+
+            // Add explicit ingestion job after deployment completes
+            const troubleshootInitialIngestion = new Rule(this, "troubleshootInitialIngestion", {
+                eventPattern: {
+                    source: ["aws.cloudformation"],
+                    detailType: ["CloudFormation Resource Status Change"],
+                    detail: {
+                        resourceType: ["AWS::S3::BucketDeployment"],
+                        resourceStatus: ["CREATE_COMPLETE", "UPDATE_COMPLETE"],
+                        logicalResourceId: [troubleshootKnowledgeDeployment.node.id]
+                    }
+                },
+                targets: [
+                    new AwsApi({
+                        service: "bedrock-agent",
+                        action: "startIngestionJob",
+                        parameters: {
+                            knowledgeBaseId: troubleshootKnowledgeBase.knowledgeBaseId,
+                            dataSourceId: troubleshootKnowledgeSource.dataSourceId,
+                        },
+                    }),
+                ],
+            });
+        }
 
         // Create a knowledge base sync checker to ensure data is synchronized
         const troubleshootSyncChecker = new KnowledgeBaseSyncChecker(this, "troubleshootSyncChecker", {
