@@ -36,13 +36,11 @@ export class Storage extends Construct {
             serverAccessLogsBucket: loggingBucket,
         });
 
-        // Create Athena results bucket with a consistent, proper name
+        // Create Athena results bucket - let CDK generate the name to avoid conflicts
         const athenaResultsBucket = new CommonStorageBucket(this, "athenaResultsBucket", {
             allowedOrigins: urls,
             eventBridgeEnabled: true,
             serverAccessLogsBucket: loggingBucket,
-            // Add a predictable bucket name that follows AWS naming conventions
-            bucketName: `${Stack.of(this).stackName}-athena-results-${Stack.of(this).account}`.toLowerCase()
         });
 
         const storageDeployment = new s3_deployment.BucketDeployment(this, "storageDeployment", {
@@ -136,6 +134,31 @@ export class Storage extends Construct {
         // Grant Athena permissions to access the results bucket
         athenaResultsBucket.grantReadWrite(new ServicePrincipal('athena.amazonaws.com'));
         
+        // Ensure Athena primary workgroup is enabled before running queries
+        const enableWorkgroupCall: AwsSdkCall = {
+            service: 'Athena',
+            action: 'updateWorkGroup',
+            parameters: {
+                WorkGroup: 'primary',
+                State: 'ENABLED'
+            },
+            physicalResourceId: PhysicalResourceId.of(`${Stack.of(this).stackName}-enable-athena-workgroup`),
+        };
+        
+        const enableWorkgroup = new AwsCustomResource(this, 'EnableAthenaWorkgroup', {
+            onCreate: enableWorkgroupCall,
+            onUpdate: enableWorkgroupCall,
+            policy: AwsCustomResourcePolicy.fromStatements([
+                new iam.PolicyStatement({
+                    actions: [
+                        'athena:UpdateWorkGroup',
+                        'athena:GetWorkGroup'
+                    ],
+                    resources: ['*']
+                })
+            ]),
+        });
+        
         // Step 1: Drop existing orders table
         const dropOrdersTableQuery = this.createAthenaQueryResource(
             "DropOrdersTable",
@@ -205,11 +228,15 @@ export class Storage extends Construct {
         
         // Set up the proper sequence of dependencies for table creation
         
-        // Ensure drops happen after any crawlers
+        // Ensure drops happen after any crawlers and after workgroup is enabled
         crawlerResources.forEach(resource => {
             dropOrdersTableQuery.node.addDependency(resource);
             dropInventoryTableQuery.node.addDependency(resource);
         });
+        
+        // Ensure all Athena queries depend on the workgroup being enabled
+        dropOrdersTableQuery.node.addDependency(enableWorkgroup);
+        dropInventoryTableQuery.node.addDependency(enableWorkgroup);
         
         // Ensure table creation happens after table drops
         createOrdersTableQuery.node.addDependency(dropOrdersTableQuery);
