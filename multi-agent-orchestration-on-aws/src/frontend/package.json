@@ -8,8 +8,8 @@
     "scripts": {
         "generate": "npx @aws-amplify/cli codegen",
         "dev": "vite --host --port 3000",
-        "build": "vite build",
-        "build:typecheck": "tsc -b && vite build",
+        "build": "NODE_OPTIONS='--max-old-space-size=4096' vite build",
+        "build:typecheck": "NODE_OPTIONS='--max-old-space-size=4096' tsc -b && vite build",
         "preview": "vite preview --host --port 3000"
     },
     "dependencies": {
