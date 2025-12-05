@@ -1,8 +1,19 @@
 # Quick Deployment Guide
 
-## Single Command Deployment
+## ✨ Auto-Fix Enabled!
 
-Run this **one command** on your Ubuntu server to fix all issues and deploy:
+Good news! The `npm run develop` command now **automatically fixes** all issues. You can use it directly:
+
+```bash
+cd ~/multi-agent-orchestration-on-aws/multi-agent-orchestration-on-aws
+npm run develop
+```
+
+Then select option 2 (Synthesize) or 3 (Deploy) - fixes are applied automatically!
+
+## Alternative: Complete Fix Script
+
+For first-time setup or if you want everything in one command:
 
 ```bash
 cd ~/multi-agent-orchestration-on-aws/multi-agent-orchestration-on-aws && chmod +x fix-and-deploy.sh && ./fix-and-deploy.sh

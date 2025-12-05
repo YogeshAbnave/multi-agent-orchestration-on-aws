@@ -7,9 +7,9 @@ import {
     Output,
     StackSummary
 } from "@aws-sdk/client-cloudformation";
-import { blueBright, bold, greenBright, redBright } from "chalk";
+import { blueBright, bold, greenBright, redBright, yellowBright } from "chalk";
 import enquirer from "enquirer";
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import * as path from "path";
 import * as yaml from "yaml";
 import { projectConfig } from "../../config";
@@ -40,7 +40,42 @@ enum Operations {
     EXIT = "Exit 👋 [ Remember to use add-user.sh to add user to the application. ]",
 }
 
+// Auto-fix function to ensure knowledge base directories exist
+const ensureKnowledgeBaseDirs = (): void => {
+    const backendPath = path.join(__dirname, "..", "..", "src", "backend", "lib", "stacks", "backend", "multi-agent");
+    
+    const dirs = [
+        path.join(backendPath, "personalization", "knowledge-base"),
+        path.join(backendPath, "product_recommendation", "knowledge-base"),
+        path.join(backendPath, "troubleshoot", "knowledge-base", "ts"),
+    ];
+    
+    const readmes = [
+        { dir: dirs[0], content: "# Personalization Knowledge Base\nAdd personalization-related documents here.\n" },
+        { dir: dirs[1], content: "# Product Recommendation Knowledge Base\nAdd product recommendation documents here.\n" },
+        { dir: dirs[2], content: "# Troubleshoot Knowledge Base\nAdd troubleshooting documents here.\n" },
+    ];
+    
+    let created = false;
+    readmes.forEach(({ dir, content }) => {
+        if (!existsSync(dir)) {
+            mkdirSync(dir, { recursive: true });
+            created = true;
+        }
+        const readmePath = path.join(dir, "README.md");
+        if (!existsSync(readmePath)) {
+            writeFileSync(readmePath, content);
+            created = true;
+        }
+    });
+    
+    if (created) {
+        console.log(yellowBright("\n✓ Auto-fixed: Created missing knowledge base directories\n"));
+    }
+};
+
 const synthesizeStacks = async (stage: string): Promise<void> => {
+    ensureKnowledgeBaseDirs(); // Auto-fix before synth
     await executeCommand(
         `npm run -w backend cdk synth -- --profile ${getProfileName(stage)} -c stage=${stage}`
     );
@@ -91,6 +126,7 @@ const selectStacks = async (
 };
 
 const deployStacks = async (stage: string, action: "deploy" | "hotswap"): Promise<void> => {
+    ensureKnowledgeBaseDirs(); // Auto-fix before deploy
     const stacks = await selectStacks(stage, action);
     if (stacks) {
         if (action === "deploy") {
@@ -106,6 +142,7 @@ const deployStacks = async (stage: string, action: "deploy" | "hotswap"): Promis
 };
 
 const deployFrontendStack = async (stage: string): Promise<void> => {
+    ensureKnowledgeBaseDirs(); // Auto-fix before frontend deploy
     if (stage === "prod") {
         if (!(await promptConfirm(`Are you sure you want to deploy prod frontend?`))) {
             return;
