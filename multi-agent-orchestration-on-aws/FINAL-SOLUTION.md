@@ -7,7 +7,7 @@ The `npm run develop` command now **automatically handles everything**:
 1. ✅ **Clears TypeScript cache** - Ensures latest code runs
 2. ✅ **Creates knowledge base directories** - Fixes empty directory errors
 3. ✅ **Checks CDK bootstrap** - Verifies account is ready
-4. ✅ **Prompts to bootstrap** - Offers to bootstrap if needed
+4. ✅ **Bootstraps automatically** - No prompts, just does it
 5. ✅ **Runs deployment** - Proceeds with your selected operation
 
 ## 🚀 Usage
@@ -50,9 +50,10 @@ If this is your **first deployment ever**:
 
 1. Run `npm run develop`
 2. Select option 3 (Deploy)
-3. When prompted about bootstrap, type `Y`
-4. Wait for bootstrap to complete
-5. Deployment proceeds automatically
+3. Bootstrap happens automatically (1-2 minutes)
+4. Deployment proceeds automatically
+
+**No prompts, no manual commands - completely automatic!**
 
 ## 🎯 For Option 4 (Hotswap)
 

@@ -74,7 +74,7 @@ const ensureKnowledgeBaseDirs = (): void => {
     }
 };
 
-// Check and bootstrap CDK if needed
+// Check and bootstrap CDK if needed - AUTOMATIC
 const ensureCdkBootstrap = async (stage: string): Promise<boolean> => {
     const account = projectConfig.accounts[stage];
     const profile = getProfileName(stage);
@@ -91,19 +91,10 @@ const ensureCdkBootstrap = async (stage: string): Promise<boolean> => {
         console.log(greenBright("✓ CDK is already bootstrapped\n"));
         return true;
     } catch {
-        console.log(yellowBright("\n⚠ CDK is not bootstrapped for this account/region"));
+        console.log(yellowBright("\n⚠ CDK is not bootstrapped - Bootstrapping automatically..."));
         console.log(blueBright(`Account: ${account.number}, Region: ${account.region}\n`));
         
-        const shouldBootstrap = await promptConfirm(
-            "Would you like to bootstrap CDK now? (Required for deployment)"
-        );
-        
-        if (!shouldBootstrap) {
-            console.log(redBright("\n✗ Cannot proceed without CDK bootstrap\n"));
-            return false;
-        }
-        
-        console.log(blueBright("\nBootstrapping CDK..."));
+        console.log(blueBright("Bootstrapping CDK (this may take 1-2 minutes)..."));
         try {
             await executeCommand(
                 `npx aws-cdk@2.1029.2 bootstrap aws://${account.number}/${account.region} --profile ${profile}`
@@ -113,6 +104,8 @@ const ensureCdkBootstrap = async (stage: string): Promise<boolean> => {
         } catch (error) {
             console.log(redBright("\n✗ CDK Bootstrap failed!"));
             console.log(redBright("Please check your AWS credentials and permissions\n"));
+            console.log(yellowBright("You can manually bootstrap with:"));
+            console.log(yellowBright(`  npx aws-cdk@2.1029.2 bootstrap aws://${account.number}/${account.region} --profile ${profile}\n`));
             return false;
         }
     }
