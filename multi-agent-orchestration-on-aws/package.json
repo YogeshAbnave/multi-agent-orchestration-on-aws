@@ -14,7 +14,7 @@
         "configure": "npx tsx tools/cli/configure.ts",
         "format": "prettier --write . && ruff format .",
         "lint": "eslint . && ruff check .",
-        "develop": "npx tsx tools/cli/develop.ts",
+        "develop": "node tools/cli/run-develop.js",
         "stage": "git add -A",
         "commit": "npx cz"
     },
