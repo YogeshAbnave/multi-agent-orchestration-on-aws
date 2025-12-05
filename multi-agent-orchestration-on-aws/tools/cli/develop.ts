@@ -74,6 +74,50 @@ const ensureKnowledgeBaseDirs = (): void => {
     }
 };
 
+// Check and bootstrap CDK if needed
+const ensureCdkBootstrap = async (stage: string): Promise<boolean> => {
+    const account = projectConfig.accounts[stage];
+    const profile = getProfileName(stage);
+    const bucketName = `cdk-hnb659fds-assets-${account.number}-${account.region}`;
+    
+    console.log(blueBright("\nChecking CDK bootstrap status..."));
+    
+    try {
+        // Check if bootstrap bucket exists
+        await executeCommand(
+            `aws s3 ls s3://${bucketName} --profile ${profile}`,
+            true
+        );
+        console.log(greenBright("✓ CDK is already bootstrapped\n"));
+        return true;
+    } catch {
+        console.log(yellowBright("\n⚠ CDK is not bootstrapped for this account/region"));
+        console.log(blueBright(`Account: ${account.number}, Region: ${account.region}\n`));
+        
+        const shouldBootstrap = await promptConfirm(
+            "Would you like to bootstrap CDK now? (Required for deployment)"
+        );
+        
+        if (!shouldBootstrap) {
+            console.log(redBright("\n✗ Cannot proceed without CDK bootstrap\n"));
+            return false;
+        }
+        
+        console.log(blueBright("\nBootstrapping CDK..."));
+        try {
+            await executeCommand(
+                `npx aws-cdk@2.1029.2 bootstrap aws://${account.number}/${account.region} --profile ${profile}`
+            );
+            console.log(greenBright("\n✓ CDK Bootstrap completed successfully!\n"));
+            return true;
+        } catch (error) {
+            console.log(redBright("\n✗ CDK Bootstrap failed!"));
+            console.log(redBright("Please check your AWS credentials and permissions\n"));
+            return false;
+        }
+    }
+};
+
 const synthesizeStacks = async (stage: string): Promise<void> => {
     ensureKnowledgeBaseDirs(); // Auto-fix before synth
     await executeCommand(
@@ -127,6 +171,13 @@ const selectStacks = async (
 
 const deployStacks = async (stage: string, action: "deploy" | "hotswap"): Promise<void> => {
     ensureKnowledgeBaseDirs(); // Auto-fix before deploy
+    
+    // Check and bootstrap CDK if needed
+    const isBootstrapped = await ensureCdkBootstrap(stage);
+    if (!isBootstrapped) {
+        return; // Cannot proceed without bootstrap
+    }
+    
     const stacks = await selectStacks(stage, action);
     if (stacks) {
         if (action === "deploy") {
@@ -143,6 +194,13 @@ const deployStacks = async (stage: string, action: "deploy" | "hotswap"): Promis
 
 const deployFrontendStack = async (stage: string): Promise<void> => {
     ensureKnowledgeBaseDirs(); // Auto-fix before frontend deploy
+    
+    // Check and bootstrap CDK if needed
+    const isBootstrapped = await ensureCdkBootstrap(stage);
+    if (!isBootstrapped) {
+        return; // Cannot proceed without bootstrap
+    }
+    
     if (stage === "prod") {
         if (!(await promptConfirm(`Are you sure you want to deploy prod frontend?`))) {
             return;

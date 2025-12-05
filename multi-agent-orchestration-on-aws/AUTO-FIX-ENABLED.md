@@ -2,7 +2,9 @@
 
 ## ✅ What Changed
 
-The `npm run develop` command now **automatically fixes** all knowledge base directory issues before running any operations.
+The `npm run develop` command now **automatically fixes** all issues before running any operations:
+- ✅ Knowledge base directory issues
+- ✅ CDK bootstrap check and execution
 
 ## How It Works
 
@@ -16,7 +18,9 @@ The system will **automatically**:
 1. ✅ Check if knowledge-base directories exist
 2. ✅ Create missing directories
 3. ✅ Add placeholder README.md files
-4. ✅ Then proceed with your selected operation
+4. ✅ Check if CDK is bootstrapped
+5. ✅ Prompt to bootstrap if needed (one-time setup)
+6. ✅ Then proceed with your selected operation
 
 ## What Gets Auto-Fixed
 
@@ -55,19 +59,20 @@ You **no longer need** to run `fix-and-deploy.sh` before using `npm run develop`
 
 ## For First-Time Setup
 
-If this is your first deployment, you still need to:
+Just run:
 
-1. **Bootstrap CDK** (one-time):
-   ```bash
-   cd ~/multi-agent-orchestration-on-aws/multi-agent-orchestration-on-aws/src/backend
-   npx aws-cdk@2.1029.2 bootstrap aws://992167236365/us-east-1 --profile mac-prod-prod
-   ```
+```bash
+cd ~/multi-agent-orchestration-on-aws/multi-agent-orchestration-on-aws
+npm run develop
+```
 
-2. **Then use npm run develop normally**:
-   ```bash
-   cd ~/multi-agent-orchestration-on-aws/multi-agent-orchestration-on-aws
-   npm run develop
-   ```
+When you select Deploy (option 3), the system will:
+1. Check if CDK is bootstrapped
+2. Prompt you to bootstrap if needed
+3. Automatically run the bootstrap command
+4. Then proceed with deployment
+
+**No manual bootstrap needed!**
 
 ## Alternative: Complete Fix Script
 
@@ -86,5 +91,13 @@ This script:
 
 ## Summary
 
-**Before:** Had to run fix script, then npm run develop
-**Now:** Just run npm run develop - fixes happen automatically! 🎉
+**Before:** 
+- Run fix script
+- Manually bootstrap CDK
+- Then npm run develop
+
+**Now:** 
+- Just run `npm run develop`
+- All fixes happen automatically
+- Bootstrap prompt appears if needed
+- Everything just works! 🎉
