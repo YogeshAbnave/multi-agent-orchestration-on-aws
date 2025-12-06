@@ -1,0 +1,221 @@
+################################################################################
+# Multi-Agent Orchestration on AWS - Comprehensive .gitignore
+################################################################################
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Package manager lock files (optional - uncomment if you want to ignore)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+.vite/
+*.tsbuildinfo
+
+# CDK outputs
+cdk.out/
+cdk.context.json
+.cdk.staging/
+
+# AWS
+.aws-sam/
+samconfig.toml
+*.pem
+*.pub
+*.key
+
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate.backup
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+*.iml
+
+# OS
+Thumbs.db
+Desktop.ini
+.Spotlight-V100
+.Trashes
+._*
+.AppleDouble
+.LSOverride
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+.jest/
+test-results/
+junit.xml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+.cache/
+
+# Compiled files
+*.js.map
+*.d.ts.map
+
+# Python (if any Lambda functions use Python)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Secrets and credentials
+*.pem
+*.key
+*.cert
+*.crt
+secrets.json
+credentials.json
+config/secrets.json
+
+# AWS CDK
+.cdk.staging/
+cdk.out/
+
+# Frontend specific
+# React/Vite build
+multi-agent-orchestration-on-aws/src/frontend/dist/
+multi-agent-orchestration-on-aws/src/frontend/build/
+multi-agent-orchestration-on-aws/src/frontend/.vite/
+
+# Backend specific
+multi-agent-orchestration-on-aws/src/backend/cdk.out/
+multi-agent-orchestration-on-aws/src/backend/.aws-sam/
+
+# Deployment artifacts
+*.zip
+*.tar.gz
+*.tgz
+
+# Local configuration
+config/local.json
+config/development.json
+**/config/project-config.json
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Generated documentation
+docs/generated/
+api-docs/
+
+# Husky
+.husky/_/
+
+# Misc
+.eslintcache
+.stylelintcache
+*.orig
+.vercel
+.turbo
+
+# CloudFormation templates (generated)
+*.template.json
+*.template.yaml
+
+# Local scripts (keep deployment scripts but ignore local test scripts)
+test-local.sh
+debug-*.sh
+local-*.sh
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# GraphQL generated
+**/generated/
+graphql-schema.json
+
+# Amplify
+amplify/
+.amplifyrc
+
+# Serverless
+.serverless/
+
+# Webpack
+.webpack/
+
+# ESBuild
+.esbuild/
+
+# SWC
+.swc/
