@@ -26,6 +26,6 @@ interface ProjectConfigWithoutPipeline extends BaseProjectConfig {
     gitlabProject?: string;
 }
 type ProjectConfig = ProjectConfigWithPipeline | ProjectConfigWithoutPipeline;
-export declare const projectConfigPath: any;
+export declare const projectConfigPath: string;
 export declare const projectConfig: ProjectConfig;
 export {};

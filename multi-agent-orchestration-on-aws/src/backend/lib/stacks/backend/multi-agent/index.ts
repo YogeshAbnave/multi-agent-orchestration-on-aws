@@ -96,12 +96,6 @@ export class MultiAgent extends Construct {
             loggingBucket,
         });
         
-        // Extract the bucket deployments from each subagent to use as dependencies later
-        // These are private properties, but we can access them through node.findChild
-        const personalizationKnowledgeDeployment = personalizationSubAgent.node.findChild('personalizationKnowledgeDeployment');
-        const productRecommendationKnowledgeDeployment = productRecommendationSubAgent.node.findChild('productRecommendationKnowledgeDeployment');
-        const troubleshootKnowledgeDeployment = troubleshootSubAgent.node.findChild('troubleshootKnowledgeDeployment');
-        
         // Collect knowledge base IDs from all subagents
         const knowledgeBaseIds = [
             personalizationSubAgent.knowledgeBaseId,
@@ -156,19 +150,7 @@ export class MultiAgent extends Construct {
             ])
         });
         
-        // Add explicit dependencies to ensure the custom resource waits for all knowledge base deployments
-        // This ensures that all knowledge bases and their data sources are fully created and available
-        if (personalizationKnowledgeDeployment) {
-            triggerKnowledgeBaseSync.node.addDependency(personalizationKnowledgeDeployment);
-        }
-        if (productRecommendationKnowledgeDeployment) {
-            triggerKnowledgeBaseSync.node.addDependency(productRecommendationKnowledgeDeployment);
-        }
-        if (troubleshootKnowledgeDeployment) {
-            triggerKnowledgeBaseSync.node.addDependency(troubleshootKnowledgeDeployment);
-        }
-        
-        // Also add dependencies on the knowledge bases themselves to ensure proper ordering
+        // Add dependencies on the sub-agents to ensure proper ordering
         triggerKnowledgeBaseSync.node.addDependency(personalizationSubAgent);
         triggerKnowledgeBaseSync.node.addDependency(productRecommendationSubAgent);
         triggerKnowledgeBaseSync.node.addDependency(troubleshootSubAgent);
